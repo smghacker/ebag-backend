@@ -6,71 +6,90 @@ from catalog.models import SimilarCategory, Category
 
 def build_similarity_graph():
     graph = defaultdict(set)
-    for rel in SimilarCategory.objects.all().select_related("category_a", "category_b"):
+    for rel in SimilarCategory.objects.select_related("category_a", "category_b"):
         graph[rel.category_a_id].add(rel.category_b_id)
         graph[rel.category_b_id].add(rel.category_a_id)
     return graph
 
 
-def find_rabbit_islands_and_longest_path(graph):
+def find_rabbit_islands(graph):
     visited = set()
     islands = []
-    longest_path = []
 
     def bfs(start):
+        queue = deque([start])
+        component = {start}
+        visited.add(start)
+
+        while queue:
+            node = queue.popleft()
+            for neighbor in graph[node]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    component.add(neighbor)
+                    queue.append(neighbor)
+        return component
+
+    for node in graph:
+        if node not in visited:
+            islands.append(bfs(node))
+
+    return islands
+
+
+def find_diameter_of_island(graph, island):
+    def bfs_longest_path(start):
         queue = deque([[start]])
         seen = {start}
-        component = {start}
-        max_path = []
+        longest_path = []
 
         while queue:
             path = queue.popleft()
             node = path[-1]
-
             for neighbor in graph[node]:
                 if neighbor not in seen:
                     seen.add(neighbor)
-                    queue.append(path + [neighbor])
-                    component.add(neighbor)
-                    if len(path) + 1 > len(max_path):
-                        max_path = path + [neighbor]
+                    new_path = path + [neighbor]
+                    queue.append(new_path)
+                    if len(new_path) > len(longest_path):
+                        longest_path = new_path
+        return longest_path
 
-        return component, max_path
+    any_node = next(iter(island))
+    first_extreme = bfs_longest_path(any_node)
+    if not first_extreme:
+        return []
 
-    for node in graph:
-        if node not in visited:
-            component, path = bfs(node)
-            islands.append(component)
-            visited.update(component)
-            if len(path) > len(longest_path):
-                longest_path = path
+    second_extreme = bfs_longest_path(first_extreme[-1])
+    return second_extreme
 
-    return islands, longest_path
+
+def format_category_path(category_ids):
+    id_to_name = dict(Category.objects.values_list("id", "name"))
+    return [{"id": cid, "name": id_to_name.get(cid, f"[Unknown:{cid}]")} for cid in category_ids]
 
 
 def export_graph_analysis_to_json(path="graph_report.json"):
     graph = build_similarity_graph()
-    islands, longest_path_ids = find_rabbit_islands_and_longest_path(graph)
-    id_to_name = dict(Category.objects.values_list("id", "name"))
+    islands = find_rabbit_islands(graph)
 
-    data = {
+    longest_path = []
+    for island in islands:
+        path = find_diameter_of_island(graph, island)
+        if len(path) > len(longest_path):
+            longest_path = path
+
+    report = {
         "longest_rabbit_hole": {
-            "length": len(longest_path_ids) - 1,
-            "path": [
-                {"id": cid, "name": id_to_name.get(cid, f"[Unknown:{cid}]")}
-                for cid in longest_path_ids
-            ],
+            "length": max(len(longest_path) - 1, 0),
+            "path": format_category_path(longest_path),
         },
         "rabbit_islands": [
-            [
-                {"id": cid, "name": id_to_name.get(cid, f"[Unknown:{cid}]")}
-                for cid in sorted(island)
-            ]
-            for island in islands
+            format_category_path(sorted(island)) for island in islands
         ],
     }
 
     with open(path, "w") as f:
-        json.dump(data, f, indent=2)
+        json.dump(report, f, indent=2)
 
-    return path, data
+    return path, report
