@@ -21,3 +21,6 @@ pip install -r requirements.txt
 cp .env.example .env
 python manage.py migrate
 python manage.py runserver
+```
+
+This project uses Django's development server (runserver) for local development. In a real-world deployment, a production-grade WSGI/ASGI server like Gunicorn or Uvicorn would be used.
