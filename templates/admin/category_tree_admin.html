@@ -29,7 +29,13 @@
 
       const link = $('<a class="category-link" target="_blank"></a>');
       link.attr('href', `/admin/catalog/category/${node.id}/change/`);
-      link.text(node.name);
+      let label = `<strong>${node.name}</strong>`;
+      if (node.similar_to && node.similar_to.length > 0) {
+        const simList = node.similar_to.join(", ");
+        label += ` <span style="color:#666; font-weight: normal;">(Similar to: ${simList})</span>`;
+      }
+      link.html(label);
+
 
       li.append(link);
 

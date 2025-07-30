@@ -4,6 +4,8 @@ from django.urls import path
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
+from django.db import models
+
 
 from .models import Category, SimilarCategory
 
@@ -60,6 +62,30 @@ class CategoryAdmin(nested_admin.NestedModelAdmin):
     def category_tree_view(self, request):
         return TemplateResponse(request, "admin/category_tree_admin.html", {})
 
+    def similar_to(self, obj):
+        if not obj.id:
+            return "Save the category to view similar links."
+
+        # Get all SimilarCategory where obj is involved
+        links = SimilarCategory.objects.filter(
+            models.Q(category_a=obj) | models.Q(category_b=obj)
+        )
+
+        # Pull out the "other" category in each pair
+        related_ids = {
+            link.category_b.id if link.category_a == obj else link.category_a.id
+            for link in links
+        }
+
+        if not related_ids:
+            return "—"
+
+        names = Category.objects.filter(id__in=related_ids).values_list("name", flat=True)
+        return ", ".join(sorted(names))
+
+    similar_to.short_description = "Similar To"
+
+    readonly_fields = ["similar_to"]
 
 @admin.register(SimilarCategory)
 class SimilarCategoryAdmin(admin.ModelAdmin):
