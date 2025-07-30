@@ -1,0 +1,61 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    ul.category-tree { list-style-type: none; padding-left: 20px; }
+    li.category-node { margin: 4px 0; cursor: pointer; }
+    ul.category-children { display: none; }
+    li.category-node.expanded > ul.category-children { display: block; }
+    .category-link {
+      text-decoration: none;
+      color: #0050b3;
+      font-weight: 500;
+    }
+    .category-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <h1>Category Tree</h1>
+  <ul id="categoryTree" class="category-tree"></ul>
+
+  <script>
+    function renderTree(node) {
+      const li = $('<li class="category-node"></li>');
+
+      const link = $('<a class="category-link" target="_blank"></a>');
+      link.attr('href', `/admin/catalog/category/${node.id}/change/`);
+      link.text(node.name);
+
+      li.append(link);
+
+      if (node.children && node.children.length > 0) {
+        const childrenUl = $('<ul class="category-children"></ul>');
+        node.children.forEach(child => {
+          childrenUl.append(renderTree(child));
+        });
+        li.append(childrenUl);
+      }
+
+      li.on("click", function (e) {
+        e.stopPropagation();
+        $(this).toggleClass("expanded");
+      });
+
+      return li;
+    }
+
+    $(function () {
+      $.getJSON('/api/categories/tree/', function (data) {
+        const root = $('#categoryTree');
+        data.forEach(node => {
+          root.append(renderTree(node));
+        });
+      });
+    });
+  </script>
+{% endblock %}
