@@ -5,10 +5,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.db import models
-
-
+from django.http import JsonResponse, HttpResponse
+from catalog.graph_analysis import export_graph_analysis_to_json
 from .models import Category, SimilarCategory
-
 
 class SimilarCategoryInline(nested_admin.NestedTabularInline):
     model = SimilarCategory
@@ -92,3 +91,25 @@ class SimilarCategoryAdmin(admin.ModelAdmin):
     list_display = ["category_a", "category_b"]
     autocomplete_fields = ["category_a", "category_b"]
     search_fields = ["category_a__name", "category_b__name"]
+
+# Admin view to return graph report JSON or download it
+def graph_analysis_report_view(request):
+    path, data = export_graph_analysis_to_json()
+
+    if request.GET.get("download") == "1":
+        with open(path, "r") as f:
+            response = HttpResponse(f.read(), content_type="application/json")
+            response["Content-Disposition"] = "attachment; filename=graph_report.json"
+            return response
+
+    return JsonResponse(data, json_dumps_params={"indent": 2})
+
+# Save the original method first
+original_get_urls = admin.site.get_urls
+# Add the custom view to the admin site's URLs
+def custom_admin_urls():
+    return [
+        path("export-graph-report/", admin.site.admin_view(graph_analysis_report_view), name="graph_report")
+    ] + original_get_urls()
+
+admin.site.get_urls = custom_admin_urls
