@@ -30,7 +30,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/mariadb-connector-c/include"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/mariadb-connector-c/lib/pkgconfig"
 
 pip install --upgrade pip
-pip install django djangorestframework mysqlclient python-dotenv
+pip install -r requirements.txt
 
 echo "🗄️  Creating database and user (if not exist)..."
 /opt/homebrew/bin/mysql -u $(whoami) <<EOF
