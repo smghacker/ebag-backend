@@ -26,19 +26,25 @@
   <script>
     function renderTree(node) {
       const li = $('<li class="category-node"></li>');
-
       const link = $('<a class="category-link" target="_blank"></a>');
-      link.attr('href', `/admin/catalog/category/${node.id}/change/`);
-      let label = `<strong>${node.name}</strong>`;
-      if (node.similar_to && node.similar_to.length > 0) {
-        const simList = node.similar_to.join(", ");
-        label += ` <span style="color:#666; font-weight: normal;">(Similar to: ${simList})</span>`;
-      }
-      link.html(label);
 
+      let label = `<strong>${node.name}</strong>`;
+
+      if (node.similar_to && node.similar_to.length > 0) {
+        label += ` <span style="color:#666; font-weight: normal;">(Similar to: ${node.similar_to.join(", ")})</span>`;
+      }
+
+      link.html(label);
+      link.attr("href", `/admin/catalog/category/${node.id}/change/`);
+
+      if (node.image_url) {
+        const img = $(`<img src="${node.image_url}" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;" alt="thumb"/>`);
+        li.append(img);
+      }
 
       li.append(link);
 
+      // Children
       if (node.children && node.children.length > 0) {
         const childrenUl = $('<ul class="category-children"></ul>');
         node.children.forEach(child => {
@@ -54,6 +60,7 @@
 
       return li;
     }
+
 
     $(function () {
       $.getJSON('/api/categories/tree/', function (data) {

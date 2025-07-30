@@ -89,6 +89,15 @@ class CategoryAdmin(nested_admin.NestedModelAdmin):
 
     readonly_fields = ["similar_to"]
 
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" />', obj.image.url)
+        return "—"
+
+    image_preview.short_description = "Preview"
+
+    readonly_fields = ["image_preview"]
+
 
 @admin.register(SimilarCategory)
 class SimilarCategoryAdmin(admin.ModelAdmin):

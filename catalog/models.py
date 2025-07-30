@@ -1,15 +1,42 @@
 from __future__ import annotations
 
+import os
 from typing import Optional
 
+from PIL import Image
 from django.core.exceptions import ValidationError
 from django.db import models
+
+
+def validate_image_size(image):
+    max_size = 1 * 1024 * 1024  # 1MB
+    if image.size > max_size:
+        raise ValidationError("Image size should not exceed 1MB.")
+
+
+def get_default_image():
+    return "category_images/default.png"  # Place this file under MEDIA_ROOT/category_images/
+
+
+def create_thumbnail(image_path):
+    size = (100, 100)
+    thumb_path = image_path.replace(".png", "_thumb.png").replace(".jpg", "_thumb.jpg")
+    with Image.open(image_path) as img:
+        img.thumbnail(size)
+        img.save(thumb_path)
+    return os.path.basename(thumb_path)
 
 
 class Category(models.Model):
     name: str = models.CharField(max_length=255)
     description: str = models.TextField(blank=True)
-    image: str = models.URLField(blank=True)
+    image = models.ImageField(
+        upload_to="category_images/",
+        blank=True,
+        null=True,
+        validators=[validate_image_size],
+        default=get_default_image
+    )
     parent: Optional[Category] = models.ForeignKey(
         "self",
         null=True,
@@ -49,10 +76,24 @@ class Category(models.Model):
             node = node.parent
         return depth
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image and os.path.exists(self.image.path):
+            create_thumbnail(self.image.path)
+
+    def delete(self, *args, **kwargs):
+        if self.image and os.path.isfile(self.image.path):
+            os.remove(self.image.path)
+            thumb_path = self.image.path.replace(".png", "_thumb.png").replace(".jpg", "_thumb.jpg")
+            if os.path.exists(thumb_path):
+                os.remove(thumb_path)
+        super().delete(*args, **kwargs)
+
     class Meta:
         indexes = [
             models.Index(fields=["parent"]),
         ]
+        unique_together = ("name", "parent")
         ordering = ["name"]
 
 

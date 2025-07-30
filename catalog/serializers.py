@@ -7,12 +7,13 @@ from catalog.models import Category, SimilarCategory
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["id", "name", "description", "image", "parent"]
+        fields = ["id", "name", "description", "image", "children", "similar_to"]
 
 
 class CategoryTreeSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
-    similar_to = serializers.SerializerMethodField()  # 👈 NEW
+    similar_to = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
@@ -31,6 +32,11 @@ class CategoryTreeSerializer(serializers.ModelSerializer):
         }
         names = Category.objects.filter(id__in=related_ids).values_list("name", flat=True)
         return sorted(names)
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url.replace(".png", "_thumb.png").replace(".jpg", "_thumb.jpg")
+        return None
 
 
 class SimilarCategorySerializer(serializers.ModelSerializer):
