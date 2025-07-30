@@ -43,4 +43,10 @@ EOF
 echo "🧱 Applying Django migrations..."
 python manage.py migrate || echo "📌 Skipped (no models yet)"
 
+echo "from django.contrib.auth import get_user_model; \
+User = get_user_model(); \
+User.objects.filter(username='admin').exists() or \
+User.objects.create_superuser('admin', 'admin@ebag.com', 'strongpassword')" \
+| python manage.py shell
+
 echo "✅ Setup complete! Activate with: source venv/bin/activate"
