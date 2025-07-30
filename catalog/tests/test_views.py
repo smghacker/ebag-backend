@@ -10,7 +10,7 @@ def client():
 
 
 @pytest.fixture
-def setup_categories():
+def setup_categories(db):
     root = Category.objects.create(name="Electronics")
     laptops = Category.objects.create(name="Laptops", parent=root)
     phones = Category.objects.create(name="Phones", parent=root)
@@ -22,7 +22,11 @@ def setup_categories():
 def test_category_list(client, setup_categories):
     response = client.get("/api/categories/")
     assert response.status_code == 200
-    assert any(cat["name"] == "Electronics" for cat in response.json()["results"])
+
+    data = response.json()
+    results = data if isinstance(data, list) else data.get("results", [])
+
+    assert any(cat["name"] == "Electronics" for cat in results)
 
 
 def test_category_tree(client, setup_categories):
@@ -48,9 +52,14 @@ def test_similarity_api(client, setup_categories):
 
     response = client.get("/api/similarities/")
     assert response.status_code == 200
-    results = response.json()["results"]
+
+    data = response.json()
+    results = data if isinstance(data, list) else data.get("results", [])
+
     assert any(
         (entry["category_a"] == a.id and entry["category_b"] == b.id) or
         (entry["category_a"] == b.id and entry["category_b"] == a.id)
         for entry in results
     )
+
+

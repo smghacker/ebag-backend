@@ -25,6 +25,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = CategoryTreeSerializer(roots, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["get"])
+    def subtree(self, request, pk=None):
+        category = self.get_object()
+        data = CategoryTreeSerializer(category).data
+        return Response(data)
+
 
 class SimilarCategoryViewSet(viewsets.ModelViewSet):
     queryset = SimilarCategory.objects.all()
