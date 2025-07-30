@@ -1,8 +1,9 @@
-# catalog/management/commands/analyze_graph.py
+from pprint import pprint
 
 from django.core.management.base import BaseCommand
-from pprint import pprint
+
 from catalog.graph_analysis import export_graph_analysis_to_json
+
 
 class Command(BaseCommand):
     help = "Analyze the similarity graph and output the longest rabbit hole and all rabbit islands."

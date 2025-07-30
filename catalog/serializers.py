@@ -1,13 +1,15 @@
 # catalog/serializers.py
-from rest_framework import serializers
-from catalog.models import Category, SimilarCategory
 from django.db.models import Q
+from rest_framework import serializers
+
+from catalog.models import Category, SimilarCategory
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ["id", "name", "description", "image", "parent"]
+
 
 class CategoryTreeSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
@@ -31,6 +33,7 @@ class CategoryTreeSerializer(serializers.ModelSerializer):
         names = Category.objects.filter(id__in=related_ids).values_list("name", flat=True)
         return sorted(names)
 
+
 class SimilarCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SimilarCategory
@@ -49,8 +52,8 @@ class SimilarCategorySerializer(serializers.ModelSerializer):
 
         # Check if the pair already exists
         if SimilarCategory.objects.filter(
-            category_a=data["category_a"],
-            category_b=data["category_b"],
+                category_a=data["category_a"],
+                category_b=data["category_b"],
         ).exists():
             raise serializers.ValidationError("This similarity already exists.")
 

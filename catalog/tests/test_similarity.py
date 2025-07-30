@@ -1,5 +1,6 @@
 import pytest
 from django.core.exceptions import ValidationError
+
 from catalog.models import Category, SimilarCategory
 
 

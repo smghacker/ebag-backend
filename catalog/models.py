@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from typing import Optional
 
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 
 class Category(models.Model):
@@ -84,4 +85,3 @@ class SimilarCategory(models.Model):
             models.Index(fields=["category_a"]),
             models.Index(fields=["category_b"]),
         ]
-

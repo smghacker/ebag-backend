@@ -1,6 +1,8 @@
-from collections import deque, defaultdict
-from catalog.models import SimilarCategory, Category
 import json
+from collections import deque, defaultdict
+
+from catalog.models import SimilarCategory, Category
+
 
 def build_similarity_graph():
     graph = defaultdict(set)
@@ -8,6 +10,7 @@ def build_similarity_graph():
         graph[rel.category_a_id].add(rel.category_b_id)
         graph[rel.category_b_id].add(rel.category_a_id)
     return graph
+
 
 def find_rabbit_islands_and_longest_path(graph):
     visited = set()
@@ -43,6 +46,7 @@ def find_rabbit_islands_and_longest_path(graph):
                 longest_path = path
 
     return islands, longest_path
+
 
 def export_graph_analysis_to_json(path="graph_report.json"):
     graph = build_similarity_graph()

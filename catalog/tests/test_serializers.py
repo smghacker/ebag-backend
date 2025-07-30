@@ -1,12 +1,12 @@
 import pytest
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from catalog.models import Category, SimilarCategory
 from catalog.serializers import (
     CategorySerializer,
     CategoryTreeSerializer,
     SimilarCategorySerializer,
 )
-from django.core.exceptions import ValidationError
-from rest_framework.exceptions import ValidationError as DRFValidationError
 
 
 @pytest.mark.django_db
