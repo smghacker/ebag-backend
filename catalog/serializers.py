@@ -79,11 +79,4 @@ class SimilarCategorySerializer(serializers.ModelSerializer):
         if a_id > b_id:
             data["category_a"], data["category_b"] = data["category_b"], data["category_a"]
 
-        # Check if the pair already exists
-        if SimilarCategory.objects.filter(
-                category_a=data["category_a"],
-                category_b=data["category_b"],
-        ).exists():
-            raise serializers.ValidationError("This similarity already exists.")
-
         return data
