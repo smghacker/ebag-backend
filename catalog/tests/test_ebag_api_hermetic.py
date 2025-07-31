@@ -32,7 +32,7 @@ class TestCategoryAPI:
 
     def test_create_and_patch_category(self):
         root = Category.objects.create(name="Parent", description="Root")
-        with open("test-images/fruits.jpg", "rb") as img:
+        with open("test-images/fruits.jpeg", "rb") as img:
             response = self.client.post("/api/categories/", {
                 "name": "TestCategory",
                 "description": "Test Desc",
