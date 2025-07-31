@@ -1,4 +1,8 @@
+from io import BytesIO
+
 import pytest
+from PIL import Image
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 from catalog.models import Category, SimilarCategory
@@ -9,12 +13,20 @@ from catalog.serializers import (
 )
 
 
+def get_test_image():
+    img_io = BytesIO()
+    image = Image.new("RGB", (100, 100), color="red")
+    image.save(img_io, format="JPEG")
+    img_io.seek(0)
+    return SimpleUploadedFile("test.jpg", img_io.read(), content_type="image/jpeg")
+
+
 @pytest.mark.django_db
 def test_category_serializer_create():
     data = {
         "name": "Books",
         "description": "All books",
-        "image": "https://example.com/image.jpg",
+        "image": get_test_image(),
         "parent": None,
     }
     serializer = CategorySerializer(data=data)

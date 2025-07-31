@@ -5,6 +5,15 @@ from catalog.models import Category, SimilarCategory
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    similar_to = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Category.objects.all(),
+        required=False
+    )
+
+    children = serializers.PrimaryKeyRelatedField(
+        many=True, read_only=True
+    )
     class Meta:
         model = Category
         fields = ["id", "name", "description", "image", "children", "similar_to"]
