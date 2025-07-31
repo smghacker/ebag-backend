@@ -14,9 +14,15 @@ class CategorySerializer(serializers.ModelSerializer):
     children = serializers.PrimaryKeyRelatedField(
         many=True, read_only=True
     )
+
+    parent = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        required=False,
+        allow_null=True
+    )
     class Meta:
         model = Category
-        fields = ["id", "name", "description", "image", "children", "similar_to"]
+        fields = ["id", "name", "description", "image", "children", "parent", "similar_to"]
 
 
 class CategoryTreeSerializer(serializers.ModelSerializer):
