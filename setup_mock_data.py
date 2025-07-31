@@ -1,8 +1,9 @@
+
 import os
 import requests
 
 BASE_URL = "http://localhost:8000/api"
-IMAGE_DIR = "test-images"
+IMAGE_DIR = "media/test-images"
 
 categories = [
   {
@@ -187,65 +188,42 @@ def create_categories():
         jpg_path = os.path.join(IMAGE_DIR, name_base + ".jpg")
         jpeg_path = os.path.join(IMAGE_DIR, name_base + ".jpeg")
         img_path = jpg_path if os.path.exists(jpg_path) else jpeg_path
-        if not os.path.exists(img_path):
-            print(f"Skipping {cat['name']} (image missing)")
-            continue
-        files = {
-            'image': open(img_path, 'rb')
-        }
+
         data = {
-            'name': cat['name'],
-            'description': cat['description'],
-            'children': [],
-            'similar_to': []
+            "name": cat["name"],
+            "description": cat["description"],
+            "parent": str(id_map.get(cat["parent"])) if cat["parent"] else ""
         }
+
+        files = {}
+        if os.path.exists(img_path):
+            files = { 'image': open(img_path, 'rb') }
+        else:
+            print(f"Image for {cat['name']} not found. Using default image.")
+
         resp = requests.post(f"{BASE_URL}/categories/", data=data, files=files)
         if resp.ok:
             new_id = resp.json().get('id')
             id_map[original_id] = new_id
-            print(f"Created {cat['name']}: original_id={original_id} ➜ new_id={new_id}")
+            print(f"✅ Created {cat['name']} (original_id={original_id} ➜ new_id={new_id})")
         else:
-            print(f"Failed to create {cat['name']}: {resp.status_code} {resp.text}")
+            print(f"❌ Failed to create {cat['name']}: {resp.status_code} {resp.text}")
     return id_map
-
-def patch_children(id_map):
-    parent_to_children = {}
-    for cat in categories:
-        if cat['parent'] is not None:
-            parent = cat['parent']
-            parent_to_children.setdefault(parent, []).append(cat['id'])
-
-    for original_parent, children in parent_to_children.items():
-        new_parent_id = id_map.get(original_parent)
-        new_child_ids = [id_map.get(cid) for cid in children if id_map.get(cid)]
-        if not new_parent_id or not new_child_ids:
-            print(f"Skipping parent patch for ID {original_parent}")
-            continue
-        payload = { "children": new_child_ids }
-        resp = requests.patch(f"{BASE_URL}/categories/{new_parent_id}/", json=payload)
-        if resp.ok:
-            print(f"Set children for parent {new_parent_id}: {new_child_ids}")
-        else:
-            print(f"Failed to patch children for parent {new_parent_id}: {resp.status_code} {resp.text}")
 
 def create_similarities(id_map):
     for sim in similarities:
         a = id_map.get(sim['category_a'])
         b = id_map.get(sim['category_b'])
         if not a or not b:
-            print(f"Skipping similarity (missing mapped IDs): {sim}")
+            print(f"⚠️ Skipping similarity (missing IDs): {sim}")
             continue
-        payload = {
-            'category_a': a,
-            'category_b': b
-        }
+        payload = {'category_a': a, 'category_b': b}
         resp = requests.post(f"{BASE_URL}/similarities/", json=payload)
         if resp.ok:
-            print(f"Linked similarity: {a} <-> {b}")
+            print(f"🔗 Linked similarity: {a} <-> {b}")
         else:
-            print(f"Failed to link similarity: {a} <-> {b}: {resp.status_code} {resp.text}")
+            print(f"❌ Failed similarity {a} <-> {b}: {resp.status_code} {resp.text}")
 
 if __name__ == "__main__":
     id_map = create_categories()
-    patch_children(id_map)
     create_similarities(id_map)
