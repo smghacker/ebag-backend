@@ -29,13 +29,13 @@ cd ebag-backend
 python -m venv venv
 source venv/bin/activate
 
-# 3. Install dependencies
+# <category_id_1>. Install dependencies
 pip install -r requirements.txt
 
 # 4. Run migrations
 python manage.py migrate
 
-# 5. (Optional) Add mock data
+# <category_id>. (Optional) Add mock data
 python setup_mock_data.py
 
 # 6. Run server
@@ -58,24 +58,24 @@ curl -X POST http://localhost:8000/categories/ -H "Content-Type: application/jso
 #### List (optionally filtered by parent)
 ```bash
 curl http://localhost:8000/categories/
-curl http://localhost:8000/categories/?parent=3
+curl http://localhost:8000/categories/?parent=<category_id_1>
 ```
 
 #### Retrieve
 ```bash
-curl http://localhost:8000/categories/5/
+curl http://localhost:8000/categories/<category_id>/
 ```
 
 #### Update
 ```bash
-curl -X PUT http://localhost:8000/categories/5/ -H "Content-Type: application/json" -d '{
+curl -X PUT http://localhost:8000/categories/<category_id>/ -H "Content-Type: application/json" -d '{
   "name": "Fresh Fruits", "description": "Updated", "parent": null
 }'
 ```
 
 #### Delete (only if no children)
 ```bash
-curl -X DELETE http://localhost:8000/categories/5/
+curl -X DELETE http://localhost:8000/categories/<category_id>/
 ```
 
 #### Get full tree
@@ -85,7 +85,7 @@ curl http://localhost:8000/categories/tree/
 
 #### Get subtree
 ```bash
-curl http://localhost:8000/categories/5/subtree/
+curl http://localhost:8000/categories/<category_id>/subtree/
 ```
 
 ### 🔁 Similarity Endpoints
@@ -93,7 +93,7 @@ curl http://localhost:8000/categories/5/subtree/
 #### Create (idempotent)
 ```bash
 curl -X POST http://localhost:8000/similarities/ -H "Content-Type: application/json" -d '{
-  "category_a": 3, "category_b": 7
+  "category_a": <category_id_1>, "category_b": <category_id_2>
 }'
 ```
 
@@ -104,7 +104,7 @@ curl http://localhost:8000/similarities/
 
 #### Delete similarity
 ```bash
-curl -X DELETE http://localhost:8000/similarities/12/
+curl -X DELETE http://localhost:8000/similarities/<similarity_id>/
 ```
 
 ## 🧠 Similarity Concepts
@@ -126,5 +126,3 @@ python analyze_similarity.py
 This prints the longest rabbit hole and lists of rabbit islands.
 
 ---
-
-© eBag Engineering – Built for clarity and robustness.
