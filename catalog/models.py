@@ -61,16 +61,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-    def move_to(self, new_parent: Optional[Category]) -> None:
-        """Moves the category to a new parent in the tree."""
-        if new_parent and self.pk == new_parent.pk:
-            raise ValidationError("A category cannot be its own parent.")
-
-        if new_parent and self._is_descendant_of(new_parent):
-            raise ValidationError("Cannot move a category under its own subtree.")
-        self.parent = new_parent
-        self.save()
-
     def _is_descendant_of(self, target: Category) -> bool:
         node = target
         while node:
