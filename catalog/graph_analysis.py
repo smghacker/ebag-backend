@@ -12,7 +12,7 @@ def build_similarity_graph():
     return graph
 
 
-def find_rabbit_islands(graph):
+def find_rabbit_islands(graph, all_categories):
     visited = set()
     islands = []
 
@@ -23,18 +23,19 @@ def find_rabbit_islands(graph):
 
         while queue:
             node = queue.popleft()
-            for neighbor in graph[node]:
+            for neighbor in graph.get(node, []):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     component.add(neighbor)
                     queue.append(neighbor)
         return component
 
-    for node in graph:
+    for node in all_categories:
         if node not in visited:
             islands.append(bfs(node))
 
     return islands
+
 
 
 def find_diameter_of_island(graph, island):
@@ -71,13 +72,14 @@ def format_category_path(category_ids):
 
 def export_graph_analysis_to_json(path="graph_report.json"):
     graph = build_similarity_graph()
-    islands = find_rabbit_islands(graph)
+    all_categories = list(Category.objects.values_list('id', flat=True))
+    islands = find_rabbit_islands(graph, all_categories)
 
     longest_path = []
     for island in islands:
-        path = find_diameter_of_island(graph, island)
-        if len(path) > len(longest_path):
-            longest_path = path
+        curr_path = find_diameter_of_island(graph, island)
+        if len(curr_path) > len(longest_path):
+            longest_path = curr_path
 
     report = {
         "longest_rabbit_hole": {
