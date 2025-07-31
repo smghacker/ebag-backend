@@ -21,6 +21,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
             return CategoryTreeSerializer
         return super().get_serializer_class()
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        parent_id = self.request.query_params.get("parent")
+        if parent_id is not None:
+            queryset = queryset.filter(parent_id=parent_id)
+        return queryset
+
     @action(detail=False, methods=["get"])
     def tree(self, request):
         roots = Category.objects.filter(parent__isnull=True)
