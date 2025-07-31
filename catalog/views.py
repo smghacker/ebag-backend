@@ -33,6 +33,15 @@ class CategoryViewSet(viewsets.ModelViewSet):
         data = CategoryTreeSerializer(category).data
         return Response(data)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if Category.objects.filter(parent=instance).exists():
+            return Response(
+                {"detail": "Cannot delete a category with children."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().destroy(request, *args, **kwargs)
+
 
 class SimilarCategoryViewSet(viewsets.ModelViewSet):
     queryset = SimilarCategory.objects.all()
