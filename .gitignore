@@ -17,4 +17,5 @@ db.sqlite3
 .vscode/
 .idea/
 
+.DS_Store
 media/catalog_images/uploaded_images/
