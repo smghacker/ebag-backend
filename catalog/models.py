@@ -103,6 +103,17 @@ class Category(models.Model):
                 os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
+    def clean(self):
+        if self.parent == self:
+            raise ValidationError("A category cannot be its own parent.")
+
+        # Check for loops: walk up the parent chain
+        current = self.parent
+        while current is not None:
+            if current == self:
+                raise ValidationError("A category cannot be moved into its own subtree.")
+            current = current.parent
+
     class Meta:
         indexes = [
             models.Index(fields=["parent"]),

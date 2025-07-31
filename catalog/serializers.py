@@ -7,8 +7,8 @@ from catalog.models import Category, SimilarCategory
 class CategorySerializer(serializers.ModelSerializer):
     similar_to = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Category.objects.all(),
-        required=False
+        required=False,
+        read_only=True
     )
 
     children = serializers.PrimaryKeyRelatedField(
@@ -20,6 +20,15 @@ class CategorySerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+
+    def validate(self, data):
+        instance = self.instance or Category(**data)
+        for attr, value in data.items():
+            setattr(instance, attr, value)
+
+        instance.full_clean()
+        return data
+
     class Meta:
         model = Category
         fields = ["id", "name", "description", "image", "children", "parent", "similar_to"]

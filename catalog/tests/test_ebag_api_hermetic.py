@@ -38,7 +38,6 @@ class TestCategoryAPI:
                 "description": "Test Desc",
                 "parent": root.id,
                 "children": [],
-                "similar_to": [],
                 "image": img
             }, format="multipart")
         assert response.status_code == 201

@@ -49,6 +49,11 @@ class CategoryViewSet(viewsets.ModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        instance.full_clean()
+        instance.save()
+
 
 class SimilarCategoryViewSet(viewsets.ModelViewSet):
     queryset = SimilarCategory.objects.all()
