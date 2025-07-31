@@ -10,16 +10,15 @@ from django.utils.html import format_html
 from catalog.graph_analysis import export_graph_analysis_to_json
 from .models import Category, SimilarCategory
 
-def view_similar_links(obj):
-    url = reverse("admin:catalog_similarcategory_changelist") + f"?category_a__id__exact={obj.id}"
-    return format_html("<a href='{}' target='_blank'>View all</a>", url)
-
-
-view_similar_links.short_description = "All Similar"
-
 
 @admin.register(Category)
 class CategoryAdmin(nested_admin.NestedModelAdmin):
+    def view_similar_links(obj):
+        url = reverse("admin:catalog_similarcategory_changelist") + f"?category_a__id__exact={obj.id}"
+        return format_html("<a href='{}' target='_blank'>View all</a>", url)
+
+    view_similar_links.short_description = "All Similar"
+
     list_display = ["id", "name", "parent", view_similar_links]
     search_fields = ["name", "description"]
     autocomplete_fields = ["parent"]
