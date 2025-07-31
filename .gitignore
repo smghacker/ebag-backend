@@ -16,3 +16,5 @@ db.sqlite3
 # VSCode / PyCharm
 .vscode/
 .idea/
+
+media/catalog_images/uploaded_images/

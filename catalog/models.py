@@ -22,17 +22,17 @@ def get_default_image():
 def create_thumbnail(image_path):
     size = (100, 100)
 
-    # Avoid double-thumb processing
     filename = os.path.basename(image_path).lower()
-    if "_thumb" in filename:
-        return os.path.basename(image_path)
 
-    # Generate random suffix
-    rand_suffix = secrets.token_hex(4)  # 8 characters
+    if filename == "default.png" or "_thumb" in filename:
+        return None  # nothing to change
+
+    rand_suffix = secrets.token_hex(4)
     base, ext = os.path.splitext(image_path)
     thumb_path = f"{base}_thumb_{rand_suffix}{ext}"
 
-    # Save thumbnail
+    os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
+
     with Image.open(image_path) as img:
         img.thumbnail(size)
         img.save(thumb_path)
@@ -44,7 +44,7 @@ class Category(models.Model):
     name: str = models.CharField(max_length=255)
     description: str = models.TextField(blank=True)
     image = models.ImageField(
-        upload_to="category_images/",
+        upload_to="category_images/uploaded_images/",
         blank=True,
         null=True,
         validators=[validate_image_size],
@@ -91,15 +91,21 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
         if self.image and os.path.exists(self.image.path):
-            thumb_name = create_thumbnail(self.image.path)
-            self.image.name = f"category_images/{thumb_name}"
-            super().save(update_fields=["image"])
+            filename = os.path.basename(self.image.name).lower()
+
+            if "_thumb" not in filename and filename != "default.png":
+                thumb_name = create_thumbnail(self.image.path)
+
+                if thumb_name:
+                    self.image.name = f"category_images/uploaded_images/{thumb_name}"
+                    super().save(update_fields=["image"])
 
     def delete(self, *args, **kwargs):
         if self.image and os.path.isfile(self.image.path):
-            os.remove(self.image.path)
-            if os.path.exists(self.image.path):
+            filename = os.path.basename(self.image.name).lower()
+            if filename != "default.png":
                 os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
