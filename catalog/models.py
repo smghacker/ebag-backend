@@ -9,17 +9,17 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
-def validate_image_size(image):
+def _validate_image_size(image):
     max_size = 1 * 1024 * 1024  # 1MB
     if image.size > max_size:
         raise ValidationError("Image size should not exceed 1MB.")
 
 
-def get_default_image():
+def _get_default_image():
     return "category_images/default.png"  # Place this file under MEDIA_ROOT/category_images/
 
 
-def create_thumbnail(image_path):
+def _create_thumbnail(image_path):
     size = (100, 100)
 
     filename = os.path.basename(image_path).lower()
@@ -47,8 +47,8 @@ class Category(models.Model):
         upload_to="category_images/uploaded_images/",
         blank=True,
         null=True,
-        validators=[validate_image_size],
-        default=get_default_image
+        validators=[_validate_image_size],
+        default=_get_default_image
     )
     parent: Optional[Category] = models.ForeignKey(
         "self",
@@ -86,7 +86,7 @@ class Category(models.Model):
             filename = os.path.basename(self.image.name).lower()
 
             if "_thumb" not in filename and filename != "default.png":
-                thumb_name = create_thumbnail(self.image.path)
+                thumb_name = _create_thumbnail(self.image.path)
 
                 if thumb_name:
                     self.image.name = f"category_images/uploaded_images/{thumb_name}"

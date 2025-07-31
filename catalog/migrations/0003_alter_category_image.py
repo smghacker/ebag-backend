@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='category',
             name='image',
-            field=models.ImageField(blank=True, default=catalog.models.get_default_image, null=True, upload_to='category_images/uploaded_images/', validators=[catalog.models.validate_image_size]),
+            field=models.ImageField(blank=True, default=catalog.models._get_default_image, null=True, upload_to='category_images/uploaded_images/', validators=[catalog.models._validate_image_size]),
         ),
     ]
