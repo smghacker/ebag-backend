@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import pytest
 from rest_framework.test import APIClient
-from catalog.models import Category, SimilarCategory
+
+from catalog.models import Category
 
 
 @pytest.mark.django_db
@@ -32,7 +35,8 @@ class TestCategoryAPI:
 
     def test_create_and_patch_category(self):
         root = Category.objects.create(name="Parent", description="Root")
-        with open("test-images/fruits.jpeg", "rb") as img:
+        img_path = Path(__file__).parent / "test-images" / "fruits.jpeg"
+        with open(img_path, "rb") as img:
             response = self.client.post("/api/categories/", {
                 "name": "TestCategory",
                 "description": "Test Desc",
