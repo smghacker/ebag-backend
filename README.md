@@ -1,4 +1,3 @@
-
 # eBag Category Backend
 
 A Django-based backend system for managing a tree of product categories with image support and bidirectional similarity tracking.
@@ -18,6 +17,7 @@ A Django-based backend system for managing a tree of product categories with ima
   - Parent ID
   - Full tree
   - Subtree of a node
+  - **Depth in tree**
 
 ## 🚀 Setup
 
@@ -29,17 +29,17 @@ cd ebag-backend
 python -m venv venv
 source venv/bin/activate
 
-# <category_id_1>. Install dependencies
+# 3. Install dependencies
 pip install -r requirements.txt
 
 # 4. Run migrations
 python manage.py migrate
 
-# <category_id>. (Optional) Add mock data
+# 5. (Optional) Add mock data
 python setup_mock_data.py
 
 # 6. Run server
-python manage.py runserver
+python manage.py runserver 0.0.0.0:8000
 ```
 
 ## 🧪 API Usage
@@ -58,7 +58,7 @@ curl -X POST http://localhost:8000/categories/ -H "Content-Type: application/jso
 #### List (optionally filtered by parent)
 ```bash
 curl http://localhost:8000/categories/
-curl http://localhost:8000/categories/?parent=<category_id_1>
+curl http://localhost:8000/categories/?parent=<category_id>
 ```
 
 #### Retrieve
@@ -86,6 +86,11 @@ curl http://localhost:8000/categories/tree/
 #### Get subtree
 ```bash
 curl http://localhost:8000/categories/<category_id>/subtree/
+```
+
+#### Get by depth
+```bash
+curl http://localhost:8000/categories/by_depth/?depth=<depth>
 ```
 
 ### 🔁 Similarity Endpoints
@@ -122,7 +127,13 @@ To analyze this:
 ```bash
 python analyze_similarity.py
 ```
+OR
+```bash
+python manage.py analyze_graph
+```
+OR
+```bash
+curl http://localhost:8000/admin/export-graph-report/
+```
 
 This prints the longest rabbit hole and lists of rabbit islands.
-
----
