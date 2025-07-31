@@ -1,3 +1,5 @@
+from django.db.models import Q
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -35,3 +37,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class SimilarCategoryViewSet(viewsets.ModelViewSet):
     queryset = SimilarCategory.objects.all()
     serializer_class = SimilarCategorySerializer
+
+    def create(self, request, *args, **kwargs):
+        category_a = request.data.get("category_a")
+        category_b = request.data.get("category_b")
+
+        if category_a == category_b:
+            return Response({"detail": "A category cannot be similar to itself."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        exists = SimilarCategory.objects.filter(
+            Q(category_a=category_a, category_b=category_b) |
+            Q(category_a=category_b, category_b=category_a)
+        ).exists()
+
+        if exists:
+            return Response(status=status.HTTP_200_OK)
+
+        return super().create(request, *args, **kwargs)
