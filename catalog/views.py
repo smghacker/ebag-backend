@@ -40,6 +40,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
         data = CategoryTreeSerializer(category).data
         return Response(data)
 
+    @action(detail=False, methods=["get"])
+    def by_depth(self, request):
+        try:
+            target_depth = int(request.query_params.get("depth", -1))
+        except ValueError:
+            return Response({"detail": "Invalid depth"}, status=400)
+
+        if target_depth < 0:
+            return Response({"detail": "Depth must be non-negative"}, status=400)
+
+        # Efficient filtering using Python in-memory property (for small category counts)
+        matching = [c for c in Category.objects.all() if c.depth == target_depth]
+        serializer = self.get_serializer(matching, many=True)
+        return Response(serializer.data)
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if Category.objects.filter(parent=instance).exists():

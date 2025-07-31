@@ -77,6 +77,43 @@ class TestCategoryAPI:
         del_resp = self.client.delete(f"/api/similarities/{sim_id}/")
         assert del_resp.status_code == 204
 
+    def test_get_categories_by_depth(self):
+        client = APIClient()
+
+        # Create a tree like:
+        # Root
+        # ├── Child1
+        # │   └── Grandchild1
+        # └── Child2
+
+        root = Category.objects.create(name="Root")
+        child1 = Category.objects.create(name="Child1", parent=root)
+        child2 = Category.objects.create(name="Child2", parent=root)
+        grandchild1 = Category.objects.create(name="Grandchild1", parent=child1)
+
+        # Check depth=0 (root)
+        response = client.get("/api/categories/by_depth/?depth=0")
+        assert response.status_code == 200
+        assert len(response.data) == 1
+        assert response.data[0]["name"] == "Root"
+
+        # Check depth=1 (children)
+        response = client.get("/api/categories/by_depth/?depth=1")
+        assert response.status_code == 200
+        names = {cat["name"] for cat in response.data}
+        assert names == {"Child1", "Child2"}
+
+        # Check depth=2 (grandchild)
+        response = client.get("/api/categories/by_depth/?depth=2")
+        assert response.status_code == 200
+        assert len(response.data) == 1
+        assert response.data[0]["name"] == "Grandchild1"
+
+        # Check invalid input
+        response = client.get("/api/categories/by_depth/?depth=abc")
+        assert response.status_code == 400
+        assert "Invalid depth" in response.data["detail"]
+
 
 @pytest.mark.django_db
 class TestCategoryConstraints:
