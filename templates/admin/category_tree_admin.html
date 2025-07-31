@@ -37,8 +37,9 @@
       link.html(label);
       link.attr("href", `/admin/catalog/category/${node.id}/change/`);
 
-      if (node.image_url) {
-        const img = $(`<img src="${node.image_url}" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;" alt="thumb"/>`);
+      const imageSrc = node.image;
+      if (imageSrc) {
+        const img = $(`<img src="${imageSrc}" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;" alt="thumb"/>`);
         li.append(img);
       }
 

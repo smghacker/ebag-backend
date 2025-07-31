@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import secrets
 from typing import Optional
 
 from PIL import Image
@@ -20,10 +21,22 @@ def get_default_image():
 
 def create_thumbnail(image_path):
     size = (100, 100)
-    thumb_path = image_path.replace(".png", "_thumb.png").replace(".jpg", "_thumb.jpg")
+
+    # Avoid double-thumb processing
+    filename = os.path.basename(image_path).lower()
+    if "_thumb" in filename:
+        return os.path.basename(image_path)
+
+    # Generate random suffix
+    rand_suffix = secrets.token_hex(4)  # 8 characters
+    base, ext = os.path.splitext(image_path)
+    thumb_path = f"{base}_thumb_{rand_suffix}{ext}"
+
+    # Save thumbnail
     with Image.open(image_path) as img:
         img.thumbnail(size)
         img.save(thumb_path)
+
     return os.path.basename(thumb_path)
 
 
@@ -79,14 +92,15 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.image and os.path.exists(self.image.path):
-            create_thumbnail(self.image.path)
+            thumb_name = create_thumbnail(self.image.path)
+            self.image.name = f"category_images/{thumb_name}"
+            super().save(update_fields=["image"])
 
     def delete(self, *args, **kwargs):
         if self.image and os.path.isfile(self.image.path):
             os.remove(self.image.path)
-            thumb_path = self.image.path.replace(".png", "_thumb.png").replace(".jpg", "_thumb.jpg")
-            if os.path.exists(thumb_path):
-                os.remove(thumb_path)
+            if os.path.exists(self.image.path):
+                os.remove(self.image.path)
         super().delete(*args, **kwargs)
 
     class Meta:

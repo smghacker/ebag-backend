@@ -35,7 +35,7 @@ class CategoryTreeSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         if obj.image:
-            return obj.image.url.replace(".png", "_thumb.png").replace(".jpg", "_thumb.jpg")
+            return obj.image.url
         return None
 
 
