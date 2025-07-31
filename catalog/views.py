@@ -64,3 +64,9 @@ class SimilarCategoryViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_200_OK)
 
         return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        return Response({"detail": "Editing similarities is not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response({"detail": "Editing similarities is not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

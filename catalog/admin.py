@@ -79,6 +79,15 @@ class SimilarCategoryAdmin(admin.ModelAdmin):
     autocomplete_fields = ["category_a", "category_b"]
     search_fields = ["category_a__name", "category_b__name"]
 
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return True
+
 
 # Admin view to return graph report JSON or download it
 def graph_analysis_report_view(request):

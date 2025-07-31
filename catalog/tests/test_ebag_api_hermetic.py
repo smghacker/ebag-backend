@@ -69,7 +69,7 @@ class TestCategoryAPI:
         patch_resp = self.client.patch(f"/api/similarities/{sim_id}/", {
             "category_b": c1.id
         }, format="json")
-        assert patch_resp.status_code == 200
+        assert patch_resp.status_code == 405
 
         del_resp = self.client.delete(f"/api/similarities/{sim_id}/")
         assert del_resp.status_code == 204
