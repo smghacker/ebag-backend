@@ -20,13 +20,20 @@
       font-size: 12px;
       cursor: pointer;
     }
+    .change-parent-form {
+      display: inline-block;
+      margin-left: 8px;
+    }
+    .change-parent-form input {
+      width: 160px;
+    }
   </style>
 {% endblock %}
 
 {% block content %}
   <h1>Category Tree</h1>
 
-  <!-- Hidden form to expose CSRF token -->
+  <!-- Expose CSRF token -->
   <form style="display: none;">{% csrf_token %}</form>
 
   <ul id="categoryTree" class="category-tree"></ul>
@@ -45,13 +52,48 @@
         },
         credentials: "include"
       }).then((res) => {
-        if (res.ok) {
-          location.reload();
-        } else {
-          alert("Failed to move category.");
-        }
+        if (res.ok) location.reload();
+        else alert("Failed to move category.");
       });
     }
+
+    function changeParent(id, newParentName) {
+      if (newParentName === "" || newParentName.toLowerCase() === "none") {
+        return fetch(`/api/categories/${id}/`, {
+          method: "PATCH",
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({ parent: null })
+        }).then(res => {
+          if (res.ok) location.reload();
+          else alert("Failed to change parent.");
+        });
+      }
+
+      const parent = allCategories.find(c => c.name === newParentName);
+      if (!parent) {
+        alert("Parent not found.");
+        return;
+      }
+
+      fetch(`/api/categories/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ parent: parent.id })
+      }).then(res => {
+        if (res.ok) location.reload();
+        else alert("Failed to change parent.");
+      });
+    }
+
+    let allCategories = [];
 
     function renderTree(node) {
       const li = $('<li class="category-node"></li>');
@@ -65,24 +107,36 @@
       link.html(label);
       link.attr("href", `/admin/catalog/category/${node.id}/change/`);
 
-      const imageSrc = node.image;
-      if (imageSrc) {
-        const img = $(`<img src="${imageSrc}" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;" alt="thumb"/>`);
+      if (node.image) {
+        const img = $(`<img src="${node.image}" style="width: 20px; height: 20px; margin-right: 6px; vertical-align: middle;" alt="thumb"/>`);
         li.append(img);
       }
 
       li.append(link);
 
-      // Add move up/down buttons
       const buttons = $(`
         <span class="category-actions">
           <button onclick="event.stopPropagation(); moveCategory(${node.id}, 'up')">⬆️</button>
           <button onclick="event.stopPropagation(); moveCategory(${node.id}, 'down')">⬇️</button>
+          <button onclick="event.stopPropagation(); toggleChangeParent(this)">Change Parent</button>
         </span>
       `);
       li.append(buttons);
 
-      // Children
+      const form = $(`
+        <span class="change-parent-form" style="display:none;">
+          <input type="text" placeholder="New parent (or none)" />
+          <button>OK</button>
+        </span>
+      `);
+      form.find("button").on("click", function (e) {
+        e.stopPropagation();
+        const name = form.find("input").val().trim();
+        changeParent(node.id, name);
+      });
+
+      li.append(form);
+
       if (node.children && node.children.length > 0) {
         const childrenUl = $('<ul class="category-children"></ul>');
         node.children.forEach(child => {
@@ -99,13 +153,30 @@
       return li;
     }
 
+    function toggleChangeParent(button) {
+      const form = $(button).closest("li").find(".change-parent-form");
+      form.toggle();
+      form.find("input").focus();
+    }
+
     $(function () {
       $.getJSON('/api/categories/tree/', function (data) {
+        allCategories = flattenTree(data);
         const root = $('#categoryTree');
         data.forEach(node => {
           root.append(renderTree(node));
         });
       });
     });
+
+    function flattenTree(data) {
+      const flat = [];
+      function visit(node) {
+        flat.push({ id: node.id, name: node.name });
+        if (node.children) node.children.forEach(visit);
+      }
+      data.forEach(visit);
+      return flat;
+    }
   </script>
 {% endblock %}
