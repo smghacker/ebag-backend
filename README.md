@@ -4,20 +4,23 @@ A Django-based backend system for managing a tree of product categories with ima
 
 ## ✅ Features
 
-- Nested categories (tree structure)
-- Category CRUD + move within tree
-- Tree depth tracking
-- Image upload & thumbnailing (max 1MB)
-- Bidirectional category similarity (A ↔ B)
-- Custom rules:
-  - Cannot delete a category with children
-  - Cannot be similar to self
-  - Adding A→B and B→A is idempotent
-- Query categories by:
-  - Parent ID
-  - Full tree
-  - Subtree of a node
-  - Depth in tree
+* Nested categories (tree structure)
+* Category CRUD + move within tree
+* Move subtree up/down among siblings
+* Tree depth tracking
+* Image upload & thumbnailing (max 1MB)
+* Bidirectional category similarity (A ↔ B)
+* Custom rules:
+
+  * Cannot delete a category with children
+  * Cannot be similar to self
+  * Adding A→B and B→A is idempotent
+* Query categories by:
+
+  * Parent ID
+  * Full tree
+  * Subtree of a node
+  * Depth in tree
 
 ---
 
@@ -25,19 +28,18 @@ A Django-based backend system for managing a tree of product categories with ima
 
 Ensure the following tools are installed before running:
 
-- [Homebrew](https://brew.sh/)
-- [pyenv](https://github.com/pyenv/pyenv)
-- `mysql` CLI (installed via Homebrew)
-- macOS system (tested with Apple Silicon)
+* [Homebrew](https://brew.sh/)
+* [pyenv](https://github.com/pyenv/pyenv)
+* macOS system (tested with Apple Silicon)
 
 Optional but recommended:
 
-- `pyenv-virtualenv`
-- `direnv` (to auto-activate venvs)
+* `pyenv-virtualenv`
+* `direnv` (to auto-activate venvs)
 
 ---
 
-## 🛠️ Quick Start (macOS with Homebrew)
+## 🚠️ Quick Start (macOS with Homebrew)
 
 Run the full setup script:
 
@@ -56,28 +58,35 @@ and creates a Django admin user.
 > Admin credentials: `admin / strongpassword`
 
 To setup mock data and then run the server run these commands:
+
 ```bash
 source venv/bin/activate
 
 python manage.py runserver 0.0.0.0:8000 & #start server background process
 
 python setup_mock_data.py
+```
 
 ---
 
 ## UI Usage
+
 ```bash
 open http://127.0.0.1:8000/admin/catalog/category/tree-view/
 ```
+
 ---
 
-## 🧪 API Usage
+## 🧲 API Usage
 
 All endpoints are under `/categories/` and `/similarities/`.
+
+> A ready-to-import Postman collection is provided in the project root: `postman_collection.json`
 
 ### 📁 Category Endpoints
 
 #### Create
+
 ```bash
 curl -X POST http://localhost:8000/categories/ -H "Content-Type: application/json" -d '{
   "name": "Fruits", "description": "Fresh fruits section"
@@ -85,17 +94,20 @@ curl -X POST http://localhost:8000/categories/ -H "Content-Type: application/jso
 ```
 
 #### List (optionally filtered by parent)
+
 ```bash
 curl http://localhost:8000/categories/
 curl http://localhost:8000/categories/?parent=<category_id>
 ```
 
 #### Retrieve
+
 ```bash
 curl http://localhost:8000/categories/<category_id>/
 ```
 
 #### Update
+
 ```bash
 curl -X PUT http://localhost:8000/categories/<category_id>/ -H "Content-Type: application/json" -d '{
   "name": "Fresh Fruits", "description": "Updated", "parent": null
@@ -103,28 +115,49 @@ curl -X PUT http://localhost:8000/categories/<category_id>/ -H "Content-Type: ap
 ```
 
 #### Delete (only if no children)
+
 ```bash
 curl -X DELETE http://localhost:8000/categories/<category_id>/
 ```
 
 #### Get full tree
+
 ```bash
 curl http://localhost:8000/categories/tree/
 ```
 
 #### Get subtree
+
 ```bash
 curl http://localhost:8000/categories/<category_id>/subtree/
 ```
 
 #### Get by depth
+
 ```bash
 curl http://localhost:8000/categories/by_depth/?depth=<depth>
 ```
 
+#### Move Subtree Up
+
+```bash
+curl -X POST http://localhost:8000/categories/<category_id>/move-up/
+```
+
+Moves the category up one position among its siblings.
+
+#### Move Subtree Down
+
+```bash
+curl -X POST http://localhost:8000/categories/<category_id>/move-down/
+```
+
+Moves the category down one position among its siblings.
+
 ### 🔁 Similarity Endpoints
 
 #### Create (idempotent)
+
 ```bash
 curl -X POST http://localhost:8000/similarities/ -H "Content-Type: application/json" -d '{
   "category_a": <category_id_1>, "category_b": <category_id_2>
@@ -132,11 +165,13 @@ curl -X POST http://localhost:8000/similarities/ -H "Content-Type: application/j
 ```
 
 #### List all similarities
+
 ```bash
 curl http://localhost:8000/similarities/
 ```
 
 #### Delete similarity
+
 ```bash
 curl -X DELETE http://localhost:8000/similarities/<similarity_id>/
 ```
