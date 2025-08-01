@@ -62,11 +62,22 @@ To setup mock data and then run the server run these commands:
 ```bash
 source venv/bin/activate
 
-python manage.py runserver 0.0.0.0:8000 & #start server background process
+python manage.py runserver 0.0.0.0:8000
+```
+
+And in separate tab
+```bash
+source venv/bin/activate
 
 python setup_mock_data.py
 ```
 
+
+Tests can be run via
+```bash
+source venv/bin/activate
+pytest
+```
 ---
 
 ## UI Usage
