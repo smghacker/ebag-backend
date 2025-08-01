@@ -24,7 +24,7 @@
       display: inline-block;
       margin-left: 8px;
     }
-    .change-parent-form input {
+    .change-parent-form select {
       width: 160px;
     }
   </style>
@@ -57,28 +57,7 @@
       });
     }
 
-    function changeParent(id, newParentName) {
-      if (newParentName === "" || newParentName.toLowerCase() === "none") {
-        return fetch(`/api/categories/${id}/`, {
-          method: "PATCH",
-          headers: {
-            "X-CSRFToken": getCSRFToken(),
-            "Content-Type": "application/json"
-          },
-          credentials: "include",
-          body: JSON.stringify({ parent: null })
-        }).then(res => {
-          if (res.ok) location.reload();
-          else alert("Failed to change parent.");
-        });
-      }
-
-      const parent = allCategories.find(c => c.name === newParentName);
-      if (!parent) {
-        alert("Parent not found.");
-        return;
-      }
-
+    function changeParent(id, parentId) {
       fetch(`/api/categories/${id}/`, {
         method: "PATCH",
         headers: {
@@ -86,7 +65,7 @@
           "Content-Type": "application/json"
         },
         credentials: "include",
-        body: JSON.stringify({ parent: parent.id })
+        body: JSON.stringify({ parent: parentId })
       }).then(res => {
         if (res.ok) location.reload();
         else alert("Failed to change parent.");
@@ -125,14 +104,23 @@
 
       const form = $(`
         <span class="change-parent-form" style="display:none;">
-          <input type="text" placeholder="New parent (or none)" />
+          <select><option value="">-- Top-level --</option></select>
           <button>OK</button>
         </span>
       `);
+
+      const select = form.find("select");
+      allCategories.forEach(cat => {
+        if (cat.id !== node.id) { // prevent self-parenting
+          select.append(`<option value="${cat.id}">${cat.name}</option>`);
+        }
+      });
+
       form.find("button").on("click", function (e) {
         e.stopPropagation();
-        const name = form.find("input").val().trim();
-        changeParent(node.id, name);
+        const val = form.find("select").val();
+        const parentId = val || null;
+        changeParent(node.id, parentId);
       });
 
       li.append(form);
@@ -156,7 +144,7 @@
     function toggleChangeParent(button) {
       const form = $(button).closest("li").find(".change-parent-form");
       form.toggle();
-      form.find("input").focus();
+      form.find("select").focus();
     }
 
     $(function () {
