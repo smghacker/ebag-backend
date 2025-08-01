@@ -41,7 +41,7 @@ FLUSH PRIVILEGES;
 EOF
 
 echo "🧱 Applying Django migrations..."
-python manage.py migrate || echo "📌 Skipped (no models yet)"
+python manage.py migrate
 
 echo "from django.contrib.auth import get_user_model; \
 User = get_user_model(); \

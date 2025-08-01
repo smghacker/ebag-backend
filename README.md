@@ -17,30 +17,45 @@ A Django-based backend system for managing a tree of product categories with ima
   - Parent ID
   - Full tree
   - Subtree of a node
-  - **Depth in tree**
+  - Depth in tree
 
-## 🚀 Setup
+---
+
+## 📋 Prerequisites
+
+Ensure the following tools are installed before running:
+
+- [Homebrew](https://brew.sh/)
+- [pyenv](https://github.com/pyenv/pyenv)
+- `mysql` CLI (installed via Homebrew)
+- macOS system (tested with Apple Silicon)
+
+Optional but recommended:
+
+- `pyenv-virtualenv`
+- `direnv` (to auto-activate venvs)
+
+---
+
+## 🛠️ Quick Start (macOS with Homebrew)
+
+Run the full setup script:
 
 ```bash
-# 1. Clone the project and navigate into it
-cd ebag-backend
-
-# 2. (Optional) Create and activate a virtual environment
-python -m venv venv
-source venv/bin/activate
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Run migrations
-python manage.py migrate
-
-# 5. (Optional) Add mock data
-python setup_mock_data.py
-
-# 6. Run server
-python manage.py runserver 0.0.0.0:8000
+./setup.sh
 ```
+
+It installs Python (via pyenv),
+MariaDB (via Homebrew),
+creates a virtual environment,
+sets up the database and user,
+installs requirements,
+applies migrations,
+and creates a Django admin user.
+
+> Admin credentials: `admin / strongpassword`
+
+---
 
 ## 🧪 API Usage
 
@@ -112,6 +127,8 @@ curl http://localhost:8000/similarities/
 curl -X DELETE http://localhost:8000/similarities/<similarity_id>/
 ```
 
+---
+
 ## 🧠 Similarity Concepts
 
 ### Rabbit Hole
@@ -126,14 +143,6 @@ To analyze this:
 
 ```bash
 python analyze_similarity.py
-```
-OR
-```bash
-python manage.py analyze_graph
-```
-OR
-```bash
-curl http://localhost:8000/admin/export-graph-report/
 ```
 
 This prints the longest rabbit hole and lists of rabbit islands.
