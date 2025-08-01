@@ -116,6 +116,45 @@ class TestCategoryAPI:
 
 
 @pytest.mark.django_db
+class TestCategoryReordering:
+    def setup_method(self):
+        self.client = APIClient()
+
+        # Create parent and children categories with order
+        self.parent = Category.objects.create(name="Parent")
+        self.cat_a = Category.objects.create(name="A", parent=self.parent, order=0)
+        self.cat_b = Category.objects.create(name="B", parent=self.parent, order=1)
+        self.cat_c = Category.objects.create(name="C", parent=self.parent, order=2)
+
+    def get_ordered_names(self):
+        return list(self.parent.children.order_by("order").values_list("name", flat=True))
+
+    def test_move_category_up(self):
+        url = f"/api/categories/{self.cat_c.id}/move-up/?steps=2"
+        resp = self.client.post(url)
+        assert resp.status_code == 200
+        assert self.get_ordered_names() == ["C", "A", "B"]
+
+    def test_move_category_down(self):
+        url = f"/api/categories/{self.cat_a.id}/move-down/?steps=2"
+        resp = self.client.post(url)
+        assert resp.status_code == 200
+        assert self.get_ordered_names() == ["B", "C", "A"]
+
+    def test_move_category_up_boundary(self):
+        url = f"/api/categories/{self.cat_a.id}/move-up/?steps=10"
+        resp = self.client.post(url)
+        assert resp.status_code == 200
+        assert self.get_ordered_names() == ["A", "B", "C"]
+
+    def test_move_category_down_boundary(self):
+        url = f"/api/categories/{self.cat_c.id}/move-down/?steps=5"
+        resp = self.client.post(url)
+        assert resp.status_code == 200
+        assert self.get_ordered_names() == ["A", "B", "C"]
+
+
+@pytest.mark.django_db
 class TestCategoryConstraints:
     def setup_method(self):
         self.client = APIClient()

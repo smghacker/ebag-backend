@@ -55,6 +55,42 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(matching, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["post"], url_path="move-up")
+    def move_up(self, request, pk=None):
+        return self._move(pk, request, direction="up")
+
+    @action(detail=True, methods=["post"], url_path="move-down")
+    def move_down(self, request, pk=None):
+        return self._move(pk, request, direction="down")
+
+    def _move(self, pk, request, direction):
+        try:
+            steps = int(request.query_params.get("steps", 1))
+            if steps < 0:
+                raise ValueError()
+        except ValueError:
+            return Response({"detail": "steps must be a positive integer"}, status=400)
+        category = self.get_object()
+        siblings = list(category.parent.children.order_by("order") if category.parent else Category.objects.filter(
+            parent=None).order_by("order"))
+        idx = siblings.index(category)
+
+        if direction == "up":
+            new_idx = max(0, idx - steps)
+        elif direction == "down":
+            new_idx = min(len(siblings) - 1, idx + steps)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        if new_idx != idx:
+            siblings.insert(new_idx, siblings.pop(idx))
+            for i, cat in enumerate(siblings):
+                if cat.order != i:
+                    cat.order = i
+                    cat.save(update_fields=["order"])
+
+        return Response(status=status.HTTP_200_OK)
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if Category.objects.filter(parent=instance).exists():

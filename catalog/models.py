@@ -58,6 +58,8 @@ class Category(models.Model):
         related_name="children",
     )
 
+    order = models.PositiveIntegerField(default=0)
+
     def __str__(self):
         return self.name
 
@@ -115,7 +117,7 @@ class Category(models.Model):
             models.Index(fields=["parent"]),
         ]
         unique_together = ("name", "parent")
-        ordering = ["name"]
+        ordering = ["parent_id", "order"]
 
 
 class SimilarCategory(models.Model):
