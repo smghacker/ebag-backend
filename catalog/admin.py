@@ -19,7 +19,6 @@ class CategoryAdmin(nested_admin.NestedModelAdmin):
 
     view_similar_links.short_description = "All Similar"
 
-    list_display = ["id", "name", "parent", view_similar_links]
     search_fields = ["name", "description"]
     autocomplete_fields = ["parent"]
 
@@ -30,7 +29,17 @@ class CategoryAdmin(nested_admin.NestedModelAdmin):
                 "tree-view/",
                 self.admin_site.admin_view(self.category_tree_view),
                 name="category_tree_view",
-            )
+            ),
+            path(
+                "<int:pk>/move-up/",
+                self.admin_site.admin_view(self.move_up_view),
+                name="category-move-up"
+            ),
+            path(
+                "<int:pk>/move-down/",
+                self.admin_site.admin_view(self.move_down_view),
+                name="category-move-down"
+            ),
         ]
         return custom_urls + default_urls
 
@@ -60,8 +69,6 @@ class CategoryAdmin(nested_admin.NestedModelAdmin):
 
     similar_to.short_description = "Similar To"
 
-    readonly_fields = ["similar_to"]
-
     def image_preview(self, obj):
         if obj.image:
             return format_html('<img src="{}" width="100" />', obj.image.url)
@@ -69,7 +76,30 @@ class CategoryAdmin(nested_admin.NestedModelAdmin):
 
     image_preview.short_description = "Preview"
 
-    readonly_fields = ["image_preview"]
+    readonly_fields = ["similar_to", "image_preview"]
+
+    def move_buttons(self, obj):
+        up_url = reverse("admin:category-move-up", args=[obj.pk])
+        down_url = reverse("admin:category-move-down", args=[obj.pk])
+        return format_html(
+            '<a class="button" href="{}">⬆️</a>&nbsp;<a class="button" href="{}">⬇️</a>',
+            up_url, down_url
+        )
+
+    move_buttons.short_description = "Reorder"
+    list_display = ["id", "name", "parent", "move_buttons", view_similar_links]
+
+    @require_POST
+    def move_up_view(self, request, pk):
+        from .views import CategoryViewSet
+        CategoryViewSet()._move(pk, request._request, direction="up")
+        return redirect(request.META.get("HTTP_REFERER", "/admin/"))
+
+    @require_POST
+    def move_down_view(self, request, pk):
+        from .views import CategoryViewSet
+        CategoryViewSet()._move(pk, request._request, direction="down")
+        return redirect(request.META.get("HTTP_REFERER", "/admin/"))
 
 
 @admin.register(SimilarCategory)
