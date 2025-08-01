@@ -12,24 +12,52 @@
       text-decoration: none;
       color: #0050b3;
       font-weight: 500;
+      margin-right: 8px;
     }
-    .category-link:hover {
-      text-decoration: underline;
+    .category-actions button {
+      margin-left: 4px;
+      padding: 0 6px;
+      font-size: 12px;
+      cursor: pointer;
     }
   </style>
 {% endblock %}
 
 {% block content %}
   <h1>Category Tree</h1>
+
+  <!-- Hidden form to expose CSRF token -->
+  <form style="display: none;">{% csrf_token %}</form>
+
   <ul id="categoryTree" class="category-tree"></ul>
 
   <script>
+    function getCSRFToken() {
+      return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function moveCategory(id, direction) {
+      fetch(`/api/categories/${id}/move-${direction}/?steps=1`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      }).then((res) => {
+        if (res.ok) {
+          location.reload();
+        } else {
+          alert("Failed to move category.");
+        }
+      });
+    }
+
     function renderTree(node) {
       const li = $('<li class="category-node"></li>');
       const link = $('<a class="category-link" target="_blank"></a>');
 
       let label = `<strong>${node.name}</strong>`;
-
       if (node.similar_to && node.similar_to.length > 0) {
         label += ` <span style="color:#666; font-weight: normal;">(Similar to: ${node.similar_to.join(", ")})</span>`;
       }
@@ -44,6 +72,15 @@
       }
 
       li.append(link);
+
+      // Add move up/down buttons
+      const buttons = $(`
+        <span class="category-actions">
+          <button onclick="event.stopPropagation(); moveCategory(${node.id}, 'up')">⬆️</button>
+          <button onclick="event.stopPropagation(); moveCategory(${node.id}, 'down')">⬇️</button>
+        </span>
+      `);
+      li.append(buttons);
 
       // Children
       if (node.children && node.children.length > 0) {
@@ -61,7 +98,6 @@
 
       return li;
     }
-
 
     $(function () {
       $.getJSON('/api/categories/tree/', function (data) {

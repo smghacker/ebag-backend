@@ -2,10 +2,12 @@ import nested_admin
 from django.contrib import admin
 from django.db import models
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.urls import reverse
 from django.utils.html import format_html
+from django.views.decorators.http import require_POST
 
 from catalog.graph_analysis import export_graph_analysis_to_json
 from .models import Category, SimilarCategory
