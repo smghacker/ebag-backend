@@ -1,0 +1,274 @@
+{
+  "info": {
+    "name": "eBag Category API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Category",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Fruits\", \"description\": \"All fruit items\", \"image\": \"https://example.com/image.jpg\", \"parent_id\": null}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/categories/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Edit Category",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Fresh Fruits\"}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/categories/1/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "1",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Category",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/1/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "1",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Category",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/1/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "1",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Categories",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "List by Depth",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/?depth=2/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "?depth=2",
+            ""
+          ],
+          "query": [
+            {
+              "key": "depth",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "List by Parent",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/?parent_id=1/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "?parent_id=1",
+            ""
+          ],
+          "query": [
+            {
+              "key": "parent_id",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Similarity",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"category_a_id\": 1, \"category_b_id\": 2}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/similarities/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "similarities",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Similarity",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://localhost:8000/api/similarities/?a=1&b=2/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "similarities",
+            "?a=1&b=2",
+            ""
+          ],
+          "query": [
+            {
+              "key": "a",
+              "value": "1"
+            },
+            {
+              "key": "b",
+              "value": "2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "List Similarities",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/api/similarities/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "similarities",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Move Subtree Up",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/1/move-up/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "1",
+            "move-up",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Move Subtree Down",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8000/api/categories/1/move-down/",
+          "host": [
+            "http://localhost:8000"
+          ],
+          "path": [
+            "api",
+            "categories",
+            "1",
+            "move-down",
+            ""
+          ]
+        }
+      }
+    }
+  ]
+}
