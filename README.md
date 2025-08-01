@@ -64,6 +64,12 @@ python manage.py runserver 0.0.0.0:8000
 
 ---
 
+## UI Usage
+```bash
+open http://127.0.0.1:8000/admin/catalog/category/tree-view/
+```
+---
+
 ## 🧪 API Usage
 
 All endpoints are under `/categories/` and `/similarities/`.
