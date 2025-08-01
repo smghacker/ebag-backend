@@ -55,6 +55,13 @@ and creates a Django admin user.
 
 > Admin credentials: `admin / strongpassword`
 
+To setup mock data and then run the server run these commands:
+```bash
+python setup_mock_data.py
+
+python manage.py runserver 0.0.0.0:8000
+```
+
 ---
 
 ## 🧪 API Usage
