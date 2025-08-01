@@ -21,24 +21,15 @@ python -m venv venv
 source venv/bin/activate
 
 echo "📚 Installing packages..."
-brew install mariadb
-brew services start mariadb
-brew install mariadb-connector-c
+brew install mysql-client
 
-export LDFLAGS="-L/opt/homebrew/opt/mariadb-connector-c/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/mariadb-connector-c/include"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/mariadb-connector-c/lib/pkgconfig"
+export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/mysql-client/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/mysql-client/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig"
 
 pip install --upgrade pip
 pip install -r requirements.txt
-
-echo "🗄️  Creating database and user (if not exist)..."
-/opt/homebrew/bin/mysql -u $(whoami) <<EOF
-CREATE DATABASE IF NOT EXISTS ebag_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS 'ebag_user'@'localhost' IDENTIFIED BY 'strongpassword';
-GRANT ALL PRIVILEGES ON ebag_db.* TO 'ebag_user'@'localhost';
-FLUSH PRIVILEGES;
-EOF
 
 echo "🧱 Applying Django migrations..."
 python manage.py migrate
