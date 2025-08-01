@@ -21,7 +21,7 @@ python -m venv venv
 source venv/bin/activate
 
 echo "📚 Installing packages..."
-brew install mysql-client
+brew install mysql-client --force-bottle
 
 export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
 export LDFLAGS="-L/opt/homebrew/opt/mysql-client/lib"
